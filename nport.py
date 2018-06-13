@@ -38,7 +38,7 @@ def offset_key_element(element):
         assert(element > 0)
         return element-1
     else:
-        raise TypeError, "Unknown key type"        
+        raise TypeError("Unknown key type")
 
 class network_params(object):
     """
@@ -62,20 +62,20 @@ class network_params(object):
         #print data
         #print ports
         
-        if data == None:
+        if data is None:
             # we are creating an empty set of parameters, 
             # so we should allocate them as zeros
             if ports <= 0:
-                raise ValueError, \
-                "If data is not specified, then ports must be specified"
+                raise ValueError(
+                "If data is not specified, then ports must be specified")
             
             self.__data = np.zeros((len(f), ports, ports), dtype=complex)
             self.ports = ports
         else:
             # we are using already existing data
             if (not data.shape[0] == len(f)):
-                raise ValueError, \
-                "N-port data length does not match frequency length"
+                raise ValueError(
+                "N-port data length does not match frequency length")
     
             if len(data.shape) == 1:
                 # we have a 1D array, in which case create 1-port data
@@ -84,10 +84,10 @@ class network_params(object):
                 self.ports = 1
             else:   
                 if len(data.shape) != 3:
-                    raise ValueError, \
-                    "N-port data must be either 1 or 3-dimensional"
+                    raise ValueError(
+                    "N-port data must be either 1 or 3-dimensional")
                 elif data.shape[1] != data.shape[2]:
-                    raise ValueError, "N-port data is not square"
+                    raise ValueError("N-port data is not square")
                 self.__data = data
         
                 self.ports = data.shape[2]
@@ -116,7 +116,7 @@ class network_params(object):
             elif len(key) == 3:
                 return (key[0], offset_key_element(key[1]), offset_key_element(key[2]))
              
-        raise KeyError, "Unknown key "+repr(key)
+        raise KeyError("Unknown key "+repr(key))
 
     
     def __getitem__(self, key):
@@ -224,7 +224,7 @@ class port_impedance(object):
             # a multi-dimensional array
             pass
         else:
-            raise AttributeError, "Z0 is of unknown type %s", str(type(Z0))
+            raise AttributeError("Z0 is of unknown type %s", str(type(Z0)))
     
 
 class S_params(wave_params):
@@ -256,7 +256,7 @@ class S_params(wave_params):
         Write the network parameters to a Touchstone .snp file
         """
         if self.shape[2] != 2:
-            raise Exception, "Can only write s2p"
+            raise Exception("Can only write s2p")
         
         with open(filename, "wt") as output_file:
             output_file.write("# HZ S RI R 50\n")
@@ -367,7 +367,7 @@ class S_params(wave_params):
 
     def S_params(self, Z0 = None):
         if Z0 != self.Z0 and Z0 != None:
-            raise NotImplementedError, "Change impedance via converting to a different type of parameters"
+            raise NotImplementedError("Change impedance via converting to a different type of parameters")
         else:
             return self
       
@@ -381,7 +381,7 @@ class S_params(wave_params):
         # TODO: update ACBD and T parameters to allow multiple ports        
         
         if self.shape[1] != 2:
-            raise Exception, "ABCD parameters only valid for 2-port networks"
+            raise Exception("ABCD parameters only valid for 2-port networks")
     
         ABCD = ABCD_params(f=self.f)
         S = self
@@ -466,7 +466,7 @@ class ABCD_params(network_params):
     """
     def __init__(self, f, data = None):
         if data != None and data.shape[1] != 2:
-            raise Exception, "ABCD parameters only valid for 2-port networks"
+            raise Exception("ABCD parameters only valid for 2-port networks")
         network_params.__init__(self, f=f, data=data, ports=2)
     
     def cascade(self, next_network):
@@ -475,8 +475,8 @@ class ABCD_params(network_params):
         1 connected to port 2 of this network
         """
         if not self.same_freq(next_network):
-            raise Exception, \
-            "Cannot cascade networks with different number of frequencies"
+            raise Exception(
+            "Cannot cascade networks with different number of frequencies")
         result = ABCD_params(f=self.f)
         for count in range(len(self.f)):
             result[count] = np.dot(self[count], next_network[count])
@@ -563,7 +563,7 @@ class T_params(wave_params):
     """
     def __init__(self, f, data = None, ports=2, Z0 = None):
         if data != None and data.shape[1] %2 != 0:
-            raise ValueError, "T parameters are only valid for networks with an even number of ports"
+            raise ValueError("T parameters are only valid for networks with an even number of ports")
         network_params.__init__(self, f=f, data=data, ports=ports)
         self.Z0 = Z0
     
@@ -571,7 +571,7 @@ class T_params(wave_params):
         if Z0 == self.Z0 or Z0 is None:
             return self
         else:
-            raise NotImplementedError, "Impedance conversion not defined"
+            raise NotImplementedError("Impedance conversion not defined")
       
     def S_params(self, Z0 = None):
         if self.ports != 2:
@@ -592,7 +592,7 @@ class T_params(wave_params):
         1 connected to port 2 of this network
         """
         if not self.same_freq(next_network):
-            raise ValueError,"Cannot cascade networks with different frequencies"
+            raise ValueError("Cannot cascade networks with different frequencies")
         result = T_params(f=self.f, ports=self.ports)
         for count in range(len(self.f)):
             result[count] = np.dot(self[count], next_network[count])
@@ -621,8 +621,8 @@ class Z_params(network_params):
             S[:] = (Z[:]-Z0)/(Z[:]+Z0)
             return S
         else:
-            raise Exception, \
-            "Converting Z params to S params not fully implemented"
+            raise Exception(
+            "Converting Z params to S params not fully implemented")
 
 class Y_params(network_params):
     """
@@ -757,7 +757,7 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
         # get the header line first
         header = get_line(input_file)
         if header[0] != '#':
-            raise ValueError, "First non-blank line in snp file must be header"
+            raise ValueError("First non-blank line in snp file must be header")
         
         multiplier = freq_mult[header[1].lower()]
         which_class = param_class[header[2].lower()]
@@ -765,7 +765,7 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
         try:
             convert_complex = format_decoders[header[3].lower()]
         except KeyError:
-            raise ValueError, "Unkown S parameters format code: %s" %header[3]
+            raise ValueError("Unkown S parameters format code: %s" %header[3])
       
         if Z0 == None and len(header) > 4:
             Z0 = float(header[5])

@@ -2,4 +2,4 @@ from distutils.core import setup
 
 import setuptools
 
-setup(name = "nport")
+setup(name = "nport", py_modules="nport")
