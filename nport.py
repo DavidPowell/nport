@@ -329,7 +329,7 @@ class S_params(wave_params):
 
 #           T_data = np.empty((len(self.f), self.ports, self.ports), np.complex128)
 
-            for count in xrange(self.shape[0]):
+            for count in range(self.shape[0]):
                 # create sub-matrices
                 S11_mat = S[count, 1:n+1, 1:n+1]
                 S12_mat = S[count, 1:n+1, n+1:]
@@ -688,7 +688,7 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
         returns it as a list of strings"""
         while True:
             #try:
-            l = file_obj.next().split()
+            l = file_obj.__next__().split()
             if len(l) != 0 and l[0][0] != '!':
                 break
             #except StopIteration:
@@ -702,13 +702,12 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
         returns it as a list of reals"""
         while True:
             #try:
-            l = file_obj.next().split()
+            l = file_obj.__next__().split()
             if len(l) != 0 and l[0] != '!':
                 break
             #except StopIteration:
             #    print file_obj.read()
             #    break
-                
         return [float(a) for a in l]
 
 
@@ -787,8 +786,8 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
                 line_pos = 1
               
                 # NB: order is deliberately switched, S11, S21, S12, S22
-                for inner_count in xrange(n):
-                    for outer_count in xrange(n):
+                for inner_count in range(n):
+                    for outer_count in range(n):
                         S_temp[outer_count, inner_count] = \
                             complex(data[line_pos], data[line_pos+1])
                             #get_complex(data[line_pos], data[line_pos+1])
@@ -803,7 +802,7 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
                 data = data[1:]
                 
                 # each line corresponds to a measuring port
-                for meas_count in xrange(n):
+                for meas_count in range(n):
                     if meas_count > 0:
                         data = get_line_real(input_file)
                     
@@ -811,7 +810,7 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
                     while len(data) < 2*n:
                         data.extend(get_line_real(input_file))
                 
-                    for source_count in xrange(n):
+                    for source_count in range(n):
                         # check that this is the correct order of indices
                         S_temp[meas_count, source_count] = \
                             complex(data[2*source_count], data[2*source_count+1])
