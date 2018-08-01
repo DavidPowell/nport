@@ -58,9 +58,6 @@ class network_params(object):
         data - the data to store
         ports - the number of ports
         """
-        #print f
-        #print data
-        #print ports
         
         if data is None:
             # we are creating an empty set of parameters, 
@@ -125,17 +122,12 @@ class network_params(object):
         Converts from the engineering format e.g. S[2, 1] to the internal
         zero based format of numpy arrays
         """
-        #print key
-        #print key, network_params.interpret(key, self.__data.shape)
-        #print self.__data.shape
         return self.__data.__getitem__(
             network_params.interpret(key, self.__data.shape))
     
     def __setitem__(self, key, data):
-        #print key, network_params_interpret(key, self.__data.shape)
         self.__data.__setitem__(
             network_params.interpret(key, self.__data.shape), data)
-        #return
   
     def __len__(self):
         """Returns the number of frequencies contained in these parameters"""
@@ -527,7 +519,7 @@ class ABCD_params(network_params):
 def cascade(*networks):
     "Cascade a several ABCD networks, listed starting from the input network"
 
-    result = ABCD_params(networks[0].f) #networks[-1] #.copy()
+    result = ABCD_params(networks[0].f)
     result[1,1] = 1.0
     result[2,2] = 1.0
   
@@ -643,15 +635,10 @@ class Y_params(network_params):
         Y = self
         S = S_params(f = self.f, ports = self.ports, Z0=Z0)
         
-        #Z_fact = np.sqrt(Z0)
         I = np.eye(self.ports)
         Z_fact = I*1.0/np.sqrt(Z0)
         for count in range(len(self.f)):
             S[count] = 2*dot(Z_fact, dot(np.linalg.inv(Y[count] + I*1/Z0), Z_fact)) - I
-            #S[count] = np.linalg.solve((I + Z_fact*Y[count]*Z_fact).T, (I - Z_fact*Y[count]*Z_fact).T).T
-                        
-            #print 'Y = ', Y[count]
-            #print 'S = ', S[count]
         return S
         
     def Z_params(self):
@@ -695,13 +682,9 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None, return_comments=
         """gets a line from the file object, ignoring comment or blank lines
         returns it as a list of strings"""
         while True:
-            #try:
             l = file_obj.__next__().split()
             if len(l) != 0 and l[0][0] != '!':
                 break
-            #except StopIteration:
-            #    print file_obj.read()
-            #    break
                 
         return l
 
@@ -709,13 +692,9 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None, return_comments=
         """gets a line from the file object, ignoring comment or blank lines
         returns it as a list of reals"""
         while True:
-            #try:
             l = file_obj.__next__().split()
             if len(l) != 0 and l[0] != '!':
                 break
-            #except StopIteration:
-            #    print file_obj.read()
-            #    break
         return [float(a) for a in l]
 
     def get_header_comments(file_obj):
@@ -728,21 +707,6 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None, return_comments=
                 return l.split(), comments
             else:
                 raise ValueError("Invalid line contents: "+l)
-
-#    # around 75% of time spend in these functions
-#    def ri_to_complex(float1, float2):
-#        #return complex(float(float1), float(float2))
-#        return complex(float1, float2)
-#
-#    def ma_to_complex(float1, float2):
-#        angle = float2/180*pi
-#        #float1 = float(float1)
-#        return complex(float1*np.cos(angle), float1*np.sin(angle))
-#
-#    def db_to_complex(float1, float2):       
-#        angle = float2/180*pi
-#        mag = 10.0**(float(float1)/20.0)
-#        return complex(mag*np.cos(angle), mag*np.sin(angle))
 
     # around 75% of time spend in these functions
     # These functions are designed to operate on array after it is completely loaded
@@ -832,8 +796,6 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None, return_comments=
                         # check that this is the correct order of indices
                         S_temp[meas_count, source_count] = \
                             complex(data[2*source_count], data[2*source_count+1])
-#                            get_complex(data[2*source_count], 
-#                                        data[2*source_count+1])
                 
                 S.append(S_temp.copy())
                
@@ -898,7 +860,3 @@ def linear_to_circular(pxx, pxy, pyx, pyy):
     return prr, prl, plr, pll
 
 
-#if __name__ == "__main__":
-    #s = loadsnp("/home/dap124/measurements/2008-03-27-NLTL-spectrum-sweep/linear_params.s2p")
-    #s = loadsnp(r"C:\Documents and Settings\dap124\My Documents\2008\Nonlinear Transmission Lines\2008-03-27-NLTL-spectrum-sweep\linear_params.s2p")
-    #reduce_all_snp(dir = ".", input_extension = ".s0p", selected_ports = (3, 1), input_force_ports = 4)
