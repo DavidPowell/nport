@@ -653,6 +653,14 @@ class Y_params(network_params):
             #print 'Y = ', Y[count]
             #print 'S = ', S[count]
         return S
+        
+    def Z_params(self):
+        Z = Z_params(f = self.f, ports = self.ports)
+        
+        for count in range(len(self.f)):
+            Z[count] = inv(self[count])
+        
+        return Z
 
 def loadsnp(filename, force_format = None, Z0 = None, n = None):
     """
