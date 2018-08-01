@@ -662,7 +662,7 @@ class Y_params(network_params):
         
         return Z
 
-def loadsnp(filename, force_format = None, Z0 = None, n = None):
+def loadsnp(filename, force_format = None, Z0 = None, n = None, return_comments=False):
     """
     Load the network parameters from a Touchstone format .snp file
   
@@ -718,6 +718,16 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
             #    break
         return [float(a) for a in l]
 
+    def get_header_comments(file_obj):
+        comments = []
+        while True:
+            l = file_obj.__next__()
+            if l[0] == '!':
+                comments.append(l)
+            elif l[0] == '#':
+                return l.split(), comments
+            else:
+                raise ValueError("Invalid line contents: "+l)
 
 #    # around 75% of time spend in these functions
 #    def ri_to_complex(float1, float2):
@@ -762,7 +772,7 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
     with open(filename, "rt") as input_file:
         
         # get the header line first
-        header = get_line(input_file)
+        header, comments = get_header_comments(input_file)
         if header[0] != '#':
             raise ValueError("First non-blank line in snp file must be header")
         
@@ -830,7 +840,12 @@ def loadsnp(filename, force_format = None, Z0 = None, n = None):
         # previous routines all assume real and imaginary data
         # it is quicker to convert other forms at the very end in one array operation        
         S = convert_complex(np.array(S))
-    return which_class(f=np.array(f), data = S, Z0=Z0)
+        
+    if return_comments:
+        return which_class(f=np.array(f), data = S, Z0=Z0), comments
+    else:
+        return which_class(f=np.array(f), data = S, Z0=Z0)
+    
 
 def reduce_all_snp(directory, input_extension, selected_ports, input_force_ports = None):
     """Go through all files in a directory with the given extension.  Load them
